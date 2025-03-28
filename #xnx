@@ -1,0 +1,8 @@
+
+npm install --save-dev concurrently
+"scripts": {
+  "build": "tsc",
+  "dev": "concurrently \"npx tsc --watch\" \"nodemon dist/app.ts\""
+}
+
+

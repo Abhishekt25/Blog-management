@@ -1,0 +1,42 @@
+import express from 'express';
+import path from 'path';
+import cookieParser from 'cookie-parser';
+import dotenv from 'dotenv';
+import sequelize from '../src/config/db';
+import authRoutes from '../src/routes/authRoutes';
+
+dotenv.config();
+const app = express();
+const PORT = process.env.PORT || 2507;
+
+// parsing request bodies
+app.use(express.json()); 
+app.use(express.urlencoded({ extended: true })); 
+app.use(cookieParser());
+
+
+
+// view engine 
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, '../src/views'));
+
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+
+app.use(express.static("public"));
+
+app.use('/', authRoutes);
+
+const startServer = async () => {
+  try {
+    await sequelize.authenticate();
+   // console.log('Database connected successfully');
+
+    app.listen(PORT, () => {
+      console.log(`Server running on http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    console.error('Unable to connect to the database:', error);
+  }
+};
+
+startServer();
