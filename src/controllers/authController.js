@@ -22,20 +22,23 @@ const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 dotenv_1.default.config();
 const JWT_SECRET = process.env.JWT_SECRET;
-const uploadsDir = './src/public/uploads/';
+// ✅ Define the correct uploads directory
+const uploadsDir = path_1.default.join(__dirname, '../public/uploads');
+;
+// ✅ Ensure the uploads directory exists
 if (!fs_1.default.existsSync(uploadsDir)) {
     fs_1.default.mkdirSync(uploadsDir, { recursive: true });
 }
+// ✅ Configure Multer storage with the correct destination
 const storage = multer_1.default.diskStorage({
     destination: (req, file, cb) => {
-        const uploadPath = path_1.default.join(__dirname, 'public/uploads');
-        cb(null, uploadPath);
+        cb(null, uploadsDir); // ✅ Ensures files are saved in `src/public/uploads/`
     },
     filename: (req, file, cb) => {
-        cb(null, Date.now() + path_1.default.extname(file.originalname));
+        cb(null, Date.now() + path_1.default.extname(file.originalname)); // ✅ Unique filename
     }
 });
-exports.upload = (0, multer_1.default)({ storage: storage });
+exports.upload = (0, multer_1.default)({ storage });
 const signup = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password } = req.body;
     const profileImage = req.file ? req.file.filename : null;

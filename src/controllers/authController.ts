@@ -10,23 +10,26 @@ dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
-const uploadsDir = './src/public/uploads/';
+// ✅ Define the correct uploads directory
+const uploadsDir = path.join(__dirname, '../public/uploads');;
+
+// ✅ Ensure the uploads directory exists
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
+// ✅ Configure Multer storage with the correct destination
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-      const uploadPath = path.join(__dirname, 'public/uploads');
-      cb(null, uploadPath); 
-    },
-    filename: (req, file, cb) => {
-      cb(null, Date.now() + path.extname(file.originalname)); 
-    }
+  destination: (req, file, cb) => {
+    cb(null, uploadsDir); // ✅ Ensures files are saved in `src/public/uploads/`
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname)); // ✅ Unique filename
+  }
 });
 
+export const upload = multer({ storage });
   
-export const upload = multer({ storage: storage });
 
 export const signup = async (req: any, res:any) =>{
 

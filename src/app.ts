@@ -22,7 +22,8 @@ app.use(cookieParser());
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '../src/views'));
 
-app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
+
 app.use((req: any, res: any, next: any) => {
   res.locals.userId = req.user ? req.user.id : null;
   res.locals.profileImage = req.user ? req.user.profileImage : '/images/default-profile.jpg';
