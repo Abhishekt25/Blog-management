@@ -1,12 +1,29 @@
-<%- include("../layout/header.ejs") %>
+<%- include("../layout/header.ejs", { userId: userId, profileImage: profileImage }) %>
+<div class="container mt-4">
+    <h2 class="mb-3">Edit Blog</h2>
+    <form action="/blogs/update/<%= blog.id %>" method="POST" enctype="multipart/form-data" class="border p-4 rounded shadow-sm bg-light">
+        <div class="mb-3">
+            <label class="form-label">Title</label>
+            <input type="text" name="title" class="form-control" value="<%= blog.title %>" required>
+        </div>
+        
+        <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea name="description" class="form-control" required><%= blog.description %></textarea>
+        </div>
+        
+        <div class="mb-3">
+            <label class="form-label">Upload New Image</label>
+            <input type="file" name="image" class="form-control">
+        </div>
 
-<h2>Edit Blog</h2>
-<form action="/blogs/update/<%= blog.id %>" method="POST" enctype="multipart/form-data">
-    <input type="text" name="title" value="<%= blog.title %>" required>
-    <textarea name="description" required><%= blog.description %></textarea>
-    <input type="file" name="image">
-    <img src="/uploads/<%= blog.image %>" width="100">
-    <button type="submit">Update</button>
-</form>
+        <div class="mb-3">
+            <p>Current Image:</p>
+            <img src="/uploads/<%= blog.image %>" class="img-thumbnail" width="100" alt="Blog Image">
+        </div>
+
+        <button type="submit" class="btn btn-primary">Update</button>
+    </form>
+</div>
 
 <%- include("../layout/footer.ejs") %>
