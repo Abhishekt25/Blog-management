@@ -1,0 +1,27 @@
+<%- include("../layout/header.ejs") %>
+
+<h2>Blogs</h2>
+<a href="/blogs/create">Add Blog</a>
+<table>
+    <tr>
+        <th>Title</th>
+        <th>Image</th>
+        <th>Description</th>
+        <th>Actions</th>
+    </tr>
+    <% blogs.forEach(blog => { %>
+    <tr>
+        <td><%= blog.title %></td>
+        <td><img src="/uploads/<%= blog.image %>" width="50"></td>
+        <td><%= blog.description %></td>
+        <td>
+            <a href="/blogs/edit/<%= blog.id %>">Edit</a>
+            <form action="/blogs/delete/<%= blog.id %>" method="POST">
+                <button type="submit">Delete</button>
+            </form>
+        </td>
+    </tr>
+    <% }) %>
+</table>
+
+<%- include("../layout/footer.ejs") %>

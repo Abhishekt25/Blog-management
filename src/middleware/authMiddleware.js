@@ -11,7 +11,7 @@ const authMiddleware = (req, res, next) => {
     var _a;
     const token = (_a = req.cookies) === null || _a === void 0 ? void 0 : _a.token;
     if (!token) {
-        return res.status(401).send('Access denied. No token provided.');
+        return res.redirect('/login'); // Redirect to login if no token is found
     }
     try {
         const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
@@ -20,7 +20,8 @@ const authMiddleware = (req, res, next) => {
     }
     catch (err) {
         console.error('Token verification failed:', err);
-        res.status(400).send('Invalid token.');
+        res.clearCookie('token'); // Clear invalid token
+        return res.redirect('/login'); // Redirect to login if token is invalid
     }
 };
 exports.authMiddleware = authMiddleware;

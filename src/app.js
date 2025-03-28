@@ -18,6 +18,7 @@ const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const db_1 = __importDefault(require("../src/config/db"));
 const authRoutes_1 = __importDefault(require("../src/routes/authRoutes"));
+const blogRoutes_1 = __importDefault(require("./routes/blogRoutes"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 2507;
@@ -29,8 +30,14 @@ app.use((0, cookie_parser_1.default)());
 app.set('view engine', 'ejs');
 app.set('views', path_1.default.join(__dirname, '../src/views'));
 app.use('/uploads', express_1.default.static(path_1.default.join(__dirname, 'public/uploads')));
+app.use((req, res, next) => {
+    res.locals.userId = req.user ? req.user.id : null;
+    res.locals.profileImage = req.user ? req.user.profileImage : '/images/default-profile.jpg';
+    next();
+});
 app.use(express_1.default.static("public"));
 app.use('/', authRoutes_1.default);
+app.use('/blogs', blogRoutes_1.default);
 const startServer = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield db_1.default.authenticate();

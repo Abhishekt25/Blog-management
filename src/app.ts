@@ -4,6 +4,8 @@ import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import sequelize from '../src/config/db';
 import authRoutes from '../src/routes/authRoutes';
+import blogRoutes from './routes/blogRoutes';
+
 
 dotenv.config();
 const app = express();
@@ -21,10 +23,17 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '../src/views'));
 
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+app.use((req: any, res: any, next: any) => {
+  res.locals.userId = req.user ? req.user.id : null;
+  res.locals.profileImage = req.user ? req.user.profileImage : '/images/default-profile.jpg';
+  next();
+});
+
 
 app.use(express.static("public"));
 
 app.use('/', authRoutes);
+app.use('/blogs', blogRoutes);
 
 const startServer = async () => {
   try {
