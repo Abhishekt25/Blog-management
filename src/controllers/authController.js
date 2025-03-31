@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.dashboard = exports.login = exports.signup = exports.upload = void 0;
+exports.logoutUser = exports.dashboard = exports.login = exports.signup = exports.upload = void 0;
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const user_1 = __importDefault(require("../models/user"));
@@ -22,20 +22,17 @@ const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 dotenv_1.default.config();
 const JWT_SECRET = process.env.JWT_SECRET;
-// ✅ Define the correct uploads directory
 const uploadsDir = path_1.default.join(__dirname, '../public/uploads');
 ;
-// ✅ Ensure the uploads directory exists
 if (!fs_1.default.existsSync(uploadsDir)) {
     fs_1.default.mkdirSync(uploadsDir, { recursive: true });
 }
-// ✅ Configure Multer storage with the correct destination
 const storage = multer_1.default.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, uploadsDir); // ✅ Ensures files are saved in `src/public/uploads/`
+        cb(null, uploadsDir);
     },
     filename: (req, file, cb) => {
-        cb(null, Date.now() + path_1.default.extname(file.originalname)); // ✅ Unique filename
+        cb(null, Date.now() + path_1.default.extname(file.originalname));
     }
 });
 exports.upload = (0, multer_1.default)({ storage });
@@ -105,3 +102,14 @@ const dashboard = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.dashboard = dashboard;
+const logoutUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        res.clearCookie("token");
+        res.redirect("/login");
+    }
+    catch (err) {
+        console.error("Error during logout:", err);
+        res.status(500).send("Error logging out.");
+    }
+});
+exports.logoutUser = logoutUser;

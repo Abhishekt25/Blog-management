@@ -27,11 +27,11 @@ app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
 app.use((0, cookie_parser_1.default)());
 // view engine 
-app.set('view engine', 'ejs');
-app.set('views', path_1.default.join(__dirname, '../src/views'));
-app.use('/uploads', express_1.default.static(path_1.default.join(__dirname, '../public/uploads')));
+app.set("views", path_1.default.join(__dirname, "views"));
+app.set("view engine", "ejs");
+app.use('/uploads', express_1.default.static(path_1.default.join(__dirname, 'public/uploads')));
 app.use((req, res, next) => {
-    res.locals.userId = req.user ? req.user.id : null;
+    res.locals.userId = req.userId ? req.userId : null;
     res.locals.profileImage = req.user ? req.user.profileImage : '/images/default-profile.jpg';
     next();
 });

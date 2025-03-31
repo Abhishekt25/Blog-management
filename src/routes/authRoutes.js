@@ -14,6 +14,7 @@ router.get('/signup', (req, res) => {
 router.get('/login', (req, res) => {
     res.render('login');
 });
+router.get("/logout", authController_1.logoutUser);
 router.get('/', authMiddleware_1.authMiddleware, authController_1.dashboard);
 // POST routes for handling signup and login logic
 router.post('/signup', authController_1.upload.single('profileImage'), authController_1.signup);

@@ -19,18 +19,17 @@ app.use(cookieParser());
 
 
 // view engine 
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, '../src/views'));
+app.set("views", path.join(__dirname, "views"));
+app.set("view engine", "ejs");
 
-app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
+
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 app.use((req: any, res: any, next: any) => {
-  res.locals.userId = req.user ? req.user.id : null;
+  res.locals.userId = req.userId ? req.userId : null;
   res.locals.profileImage = req.user ? req.user.profileImage : '/images/default-profile.jpg';
   next();
 });
-
-
 app.use(express.static("public"));
 
 app.use('/', authRoutes);

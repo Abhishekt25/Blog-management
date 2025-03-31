@@ -1,5 +1,5 @@
 import express from 'express';
-import { signup, login, dashboard ,upload } from '../controllers/authController';
+import { signup, login,logoutUser, dashboard ,upload } from '../controllers/authController';
 import { authMiddleware } from '../middleware/authMiddleware';
 
 
@@ -13,7 +13,7 @@ router.get('/signup', (req, res) => {
   router.get('/login', (req, res) => {
     res.render('login');
   });
-
+  router.get("/logout", logoutUser);
   router.get('/', authMiddleware, dashboard);
 
 // POST routes for handling signup and login logic

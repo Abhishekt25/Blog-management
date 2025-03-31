@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 
 // Create a blog
+
 export const createBlog = async (req: any, res: any) => {
   try {
     console.log("Request User:", req.user); // Debugging
@@ -14,9 +15,16 @@ export const createBlog = async (req: any, res: any) => {
 
     const { title, description } = req.body;
     const image = req.file ? req.file.filename : null;
-    const userId = req.user.userId; // Fix: Use `userId`
+    const userId = req.user.userId; // Corrected: Use `req.user.userId`
 
     const blog = await Blog.create({ title, description, image, userId });
+
+    // Corrected: Use `req.user` instead of `user`
+    res.render('create', {
+      userId: req.user.userId,
+      username: req.user.email,
+      profileImage: req.user.profileImage ? `/uploads/${req.user.profileImage}` : '/images/default-profile.png',
+    });
 
     res.redirect("/blogs");
   } catch (error) {
@@ -25,11 +33,19 @@ export const createBlog = async (req: any, res: any) => {
   }
 };
 
+
 // Read all blogs
 export const getAllBlogs = async (req: any, res: any) => {
   try {
+    console.log("Request User in getAllBlogs:", req.user);
+
     const blogs = await Blog.findAll();
-    res.render('blogs/blogList', { blogs, userId: req.user?.id, profileImage: req.user?.profileImage });
+    res.render('blogs/blogList', { 
+      blogs, 
+      userId: req.user?.userId || "Guest", 
+      profileImage: req.user?.profileImage || "/images/default-profile.png" 
+    });
+
   } catch (error) {
     console.error('Error fetching blogs:', error);
     res.status(500).send('Server error.');
@@ -40,13 +56,23 @@ export const getAllBlogs = async (req: any, res: any) => {
 // Get blog details for editing
 export const getEditBlog = async (req: any, res: any) => {
   try {
-    const blog = await Blog.findByPk(req.params.id);
-    if (!blog) return res.status(404).send('Blog not found.');
+    console.log("Request User:", req.user); // Debugging
 
-    res.render('blogs/editBlog', { blog, userId: req.user?.id, profileImage: req.user?.profileImage });
+    if (!req.user || !req.user.userId) {
+      return res.status(401).send("Unauthorized: User not found.");
+    }
+
+    const blog = await Blog.findByPk(req.params.id);
+    if (!blog) return res.status(404).send("Blog not found.");
+
+    res.render("blogs/editBlog", {
+      blog,
+      userId: req.user.userId, // Fixed userId
+      profileImage: req.user.profileImage ?? "/images/default-profile.png",
+    });
   } catch (error) {
-    console.error('Error fetching blog:', error);
-    res.status(500).send('Server error.');
+    console.error(" Error fetching blog:", error);
+    res.status(500).send("Server error.");
   }
 };
 

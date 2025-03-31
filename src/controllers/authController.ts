@@ -10,21 +10,20 @@ dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
-// ✅ Define the correct uploads directory
 const uploadsDir = path.join(__dirname, '../public/uploads');;
 
-// ✅ Ensure the uploads directory exists
+
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-// ✅ Configure Multer storage with the correct destination
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, uploadsDir); // ✅ Ensures files are saved in `src/public/uploads/`
+    cb(null, uploadsDir); 
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // ✅ Unique filename
+    cb(null, Date.now() + path.extname(file.originalname)); 
   }
 });
 
@@ -108,4 +107,12 @@ export const dashboard = async (req: any, res: any) => {
     }
 };
 
-  
+export const logoutUser = async (req: any, res: any) => {
+  try {
+      res.clearCookie("token"); 
+      res.redirect("/login"); 
+  } catch (err) {
+      console.error("Error during logout:", err);
+      res.status(500).send("Error logging out.");
+  }
+};
