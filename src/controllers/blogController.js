@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteBlog = exports.updateBlog = exports.getEditBlog = exports.getAllBlogs = exports.createBlog = void 0;
+exports.getBlogDetails = exports.deleteBlog = exports.updateBlog = exports.getEditBlog = exports.getAllBlogs = exports.createBlog = void 0;
 const Blog_1 = __importDefault(require("../models/Blog"));
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
@@ -25,6 +25,7 @@ const createBlog = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         }
         const { title, description } = req.body;
         const image = req.file ? req.file.filename : null;
+        console.log('Image', image);
         const userId = req.user.userId; // Corrected: Use `req.user.userId`
         const blog = yield Blog_1.default.create({ title, description, image, userId });
         // Corrected: Use `req.user` instead of `user`
@@ -43,14 +44,17 @@ const createBlog = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 exports.createBlog = createBlog;
 // Read all blogs
 const getAllBlogs = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
     try {
-        console.log("Request User in getAllBlogs:", req.user);
+        // console.log("User data in getAllBlogs:", req.user);
         const blogs = yield Blog_1.default.findAll();
+        const userId = req.user.userId;
+        const profileImage = req.user.profileImage ? `/uploads/${req.user.profileImage}` : '/images/default-profile.png';
+        // console.log("Profile Image in getAllBlogs:", profileImage);
+        const blogsWithAccess = blogs.map(blog => (Object.assign(Object.assign({}, blog.dataValues), { canEdit: blog.userId === userId })));
         res.render('blogs/blogList', {
-            blogs,
-            userId: ((_a = req.user) === null || _a === void 0 ? void 0 : _a.userId) || "Guest",
-            profileImage: ((_b = req.user) === null || _b === void 0 ? void 0 : _b.profileImage) || "/images/default-profile.png"
+            blogs: blogsWithAccess,
+            userId,
+            profileImage
         });
     }
     catch (error) {
@@ -61,23 +65,26 @@ const getAllBlogs = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
 exports.getAllBlogs = getAllBlogs;
 // Get blog details for editing
 const getEditBlog = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
     try {
-        console.log("Request User:", req.user); // Debugging
         if (!req.user || !req.user.userId) {
             return res.status(401).send("Unauthorized: User not found.");
         }
-        const blog = yield Blog_1.default.findByPk(req.params.id);
-        if (!blog)
+        const blogId = req.params.id; // Get blog ID from URL
+        // Fetch the specific blog
+        const blog = yield Blog_1.default.findByPk(blogId);
+        if (!blog) {
             return res.status(404).send("Blog not found.");
+        }
+        const userId = req.user.userId;
+        const profileImage = req.user.profileImage ? `/uploads/${req.user.profileImage}` : '/images/default-profile.png';
         res.render("blogs/editBlog", {
             blog,
-            userId: req.user.userId, // Fixed userId
-            profileImage: (_a = req.user.profileImage) !== null && _a !== void 0 ? _a : "/images/default-profile.png",
+            userId,
+            profileImage
         });
     }
     catch (error) {
-        console.error(" Error fetching blog:", error);
+        console.error("Error fetching blog:", error);
         res.status(500).send("Server error.");
     }
 });
@@ -141,3 +148,28 @@ const deleteBlog = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.deleteBlog = deleteBlog;
+// view blog
+const getBlogDetails = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    try {
+        const blogId = req.params.id;
+        // console.log("Fetching blog with ID:", blogId);
+        const blog = yield Blog_1.default.findByPk(blogId); // Fetch blog by ID
+        if (!blog) {
+            return res.status(404).send("Blog not found.");
+        }
+        // Fetch user details
+        const userId = ((_a = req.user) === null || _a === void 0 ? void 0 : _a.userId) || null;
+        const profileImage = req.user.profileImage ? `/uploads/${req.user.profileImage}` : '/images/default-profile.png';
+        res.render("blogs/viewBlog", {
+            blog,
+            userId,
+            profileImage,
+        });
+    }
+    catch (error) {
+        console.error("Error fetching blog details:", error);
+        res.status(500).send("Server error.");
+    }
+});
+exports.getBlogDetails = getBlogDetails;

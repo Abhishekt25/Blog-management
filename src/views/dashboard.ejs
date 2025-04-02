@@ -7,9 +7,12 @@
             <div>
                 <h2>Welcome, <%= username %>!</h2>
                 <p>This is your dashboard.</p>
-                <div class="text-center mt-3">
+                <div class="text-center mt-3 d-flex gap-3 justify-content-center">
                     <form action="/blogs/create" method="GET">
                         <button type="submit" class="btn btn-primary">Create Blog</button>
+                    </form>
+                    <form action="/blogs" method="GET">
+                        <button type="submit" class="btn btn-primary">Get all Blog</button>
                     </form>
                 </div>
             </div>

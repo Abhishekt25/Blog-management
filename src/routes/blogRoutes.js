@@ -14,6 +14,8 @@ const storage = multer_1.default.diskStorage({
 });
 const upload = (0, multer_1.default)({ storage });
 router.get('/', authMiddleware_1.authMiddleware, blogController_1.getAllBlogs);
+// View a single blog
+router.get("/view/:id", authMiddleware_1.authMiddleware, blogController_1.getBlogDetails);
 router.get('/create', authMiddleware_1.authMiddleware, (req, res) => {
     res.render('blogs/addBlog', {
         userId: req.user ? req.user.userId : "Guest",

@@ -1,0 +1,18 @@
+<%- include("../layout/header.ejs", { userId: userId, profileImage: profileImage }) %>
+
+<div class="container mt-4 d-flex flex-column min-vh-100">
+    <div class="text-center">
+        <h2 class="mb-3"><%= blog.title %></h2>
+        <img src="/uploads/<%= blog.image %>" class="img-thumbnail" style="max-width: 600px; height: auto;" alt="Blog Image">
+    </div>
+    
+    <div class="mt-3 flex-grow-1">
+        <p class="lead text-justify"><%= blog.description %></p>
+    </div>
+
+    <div class="text-center mt-4 mb-5 pb-5">
+        <a href="/blogs?" class="btn btn-primary">Back to Blogs</a>
+    </div>
+</div>
+
+<%- include("../layout/footer.ejs") %>

@@ -1,5 +1,5 @@
 import express from 'express';
-import { createBlog, getAllBlogs, getEditBlog, updateBlog, deleteBlog } from '../controllers/blogController';
+import { createBlog, getAllBlogs, getEditBlog, updateBlog, deleteBlog , getBlogDetails} from '../controllers/blogController';
 import { authMiddleware } from '../middleware/authMiddleware';
 import multer from 'multer';
 
@@ -14,6 +14,8 @@ const upload = multer({ storage });
 
 router.get('/', authMiddleware, getAllBlogs);
 
+// View a single blog
+router.get("/view/:id", authMiddleware, getBlogDetails);
 
 router.get('/create', authMiddleware, (req, res) => {
   res.render('blogs/addBlog', { 

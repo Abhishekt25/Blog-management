@@ -23,14 +23,15 @@ app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
 
-app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 app.use((req: any, res: any, next: any) => {
   res.locals.userId = req.userId ? req.userId : null;
   res.locals.profileImage = req.user ? req.user.profileImage : '/images/default-profile.jpg';
   next();
 });
-app.use(express.static("public"));
+
+app.use(express.static('public'));
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 app.use('/', authRoutes);
 app.use('/blogs', blogRoutes);
