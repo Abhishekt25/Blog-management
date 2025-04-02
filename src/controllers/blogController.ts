@@ -4,32 +4,23 @@ import fs from 'fs';
 import path from 'path';
 
 // Create a blog
-export const createBlog = async (req: any, res: any) => {
+export const createBlog = async (req:any, res:any) => {
   try {
-    console.log("Request User:", req.user); // Debugging
+      if (!req.user || !req.user.userId) {
+          return res.status(401).send("Unauthorized: User not found.");
+      }
 
-    if (!req.user || !req.user.userId) {
-      return res.status(401).send("Unauthorized: User not found.");
-    }
+      const { title, description } = req.body;
+      const image = req.file ? req.file.filename : null;
+      const userId = req.user.userId;
 
-    const { title, description } = req.body;
-    const image = req.file ? req.file.filename : null;
-    console.log('Image', image);
-    const userId = req.user.userId; // Corrected: Use `req.user.userId`
+      await Blog.create({ title, description, image, userId });
 
-    const blog = await Blog.create({ title, description, image, userId });
-
-    // Corrected: Use `req.user` instead of `user`
-    res.render('create', {
-      userId: req.user.userId,
-      username: req.user.email,
-      profileImage: req.user.profileImage ? `/uploads/${req.user.profileImage}` : '/images/default-profile.png',
-    });
-
-    res.redirect("/blogs");
+      // Redirect to the blogs list after successful creation
+      res.redirect("/blogs");
   } catch (error) {
-    console.error("Error creating blog:", error);
-    res.status(500).send("Server error.");
+      console.error("Error creating blog:", error);
+      res.status(500).send("Server error.");
   }
 };
 
@@ -155,7 +146,7 @@ export const deleteBlog = async (req: any, res: any) => {
 export const getBlogDetails = async (req: any, res: any) => {
   try {
     const blogId = req.params.id;
-    // console.log("Fetching blog with ID:", blogId);
+    console.log("Fetching blog with ID:", blogId);
 
     const blog = await Blog.findByPk(blogId); // Fetch blog by ID
 

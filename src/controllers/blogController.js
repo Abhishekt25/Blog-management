@@ -19,21 +19,14 @@ const path_1 = __importDefault(require("path"));
 // Create a blog
 const createBlog = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        console.log("Request User:", req.user); // Debugging
         if (!req.user || !req.user.userId) {
             return res.status(401).send("Unauthorized: User not found.");
         }
         const { title, description } = req.body;
         const image = req.file ? req.file.filename : null;
-        console.log('Image', image);
-        const userId = req.user.userId; // Corrected: Use `req.user.userId`
-        const blog = yield Blog_1.default.create({ title, description, image, userId });
-        // Corrected: Use `req.user` instead of `user`
-        res.render('create', {
-            userId: req.user.userId,
-            username: req.user.email,
-            profileImage: req.user.profileImage ? `/uploads/${req.user.profileImage}` : '/images/default-profile.png',
-        });
+        const userId = req.user.userId;
+        yield Blog_1.default.create({ title, description, image, userId });
+        // Redirect to the blogs list after successful creation
         res.redirect("/blogs");
     }
     catch (error) {
@@ -153,7 +146,7 @@ const getBlogDetails = (req, res) => __awaiter(void 0, void 0, void 0, function*
     var _a;
     try {
         const blogId = req.params.id;
-        // console.log("Fetching blog with ID:", blogId);
+        console.log("Fetching blog with ID:", blogId);
         const blog = yield Blog_1.default.findByPk(blogId); // Fetch blog by ID
         if (!blog) {
             return res.status(404).send("Blog not found.");

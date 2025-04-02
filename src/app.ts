@@ -19,9 +19,8 @@ app.use(cookieParser());
 
 
 // view engine 
-app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
-
+app.set('views', path.join(__dirname, 'views'));
 
 
 app.use((req: any, res: any, next: any) => {
@@ -30,7 +29,8 @@ app.use((req: any, res: any, next: any) => {
   next();
 });
 
-app.use(express.static('public'));
+// app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, "public")));
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 app.use('/', authRoutes);
