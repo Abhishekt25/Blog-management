@@ -1,0 +1,22 @@
+<!-- Include Header and Pass Variables -->
+<%- include("layout/header.ejs", { userId: userId, profileImage: profileImage }) %>
+
+<div class="container">
+    <div class="dashboard-container">
+        <div>
+            <h2>Welcome, <%= typeof username !== 'undefined' ? username : 'User' %>!</h2>
+            <p>This is your dashboard.</p>
+            <div class="text-center mt-3 d-flex gap-3 justify-content-center">
+                <form action="/blogs/create" method="GET">
+                    <button type="submit" class="btn btn-primary">Create Blog</button>
+                </form>
+                <form action="/blogs" method="GET">
+                    <button type="submit" class="btn btn-primary">Get all Blogs</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include Footer -->
+<%- include("layout/footer.ejs") %>
