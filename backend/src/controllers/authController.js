@@ -12,25 +12,43 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.logoutUser = exports.updateProfile = exports.dashboard = exports.login = exports.signup = void 0;
+exports.logoutUser = exports.updateProfile = exports.dashboard = exports.login = exports.signup = exports.upload = void 0;
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const user_1 = __importDefault(require("../models/user"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const multer_1 = __importDefault(require("multer"));
 const path_1 = __importDefault(require("path"));
+const fs_1 = __importDefault(require("fs"));
 dotenv_1.default.config();
 const JWT_SECRET = process.env.JWT_SECRET;
 const storage = multer_1.default.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, "public/uploads/");
+        // Create directory if it doesn't exist
+        const uploadPath = path_1.default.join(__dirname, '../../public/uploads');
+        fs_1.default.mkdirSync(uploadPath, { recursive: true });
+        cb(null, uploadPath);
     },
     filename: (req, file, cb) => {
         const ext = path_1.default.extname(file.originalname);
-        cb(null, `${Date.now()}-${file.fieldname}${ext}`);
+        cb(null, `${Date.now()}${ext}`);
     },
 });
-const upload = (0, multer_1.default)({ storage });
+exports.upload = (0, multer_1.default)({
+    storage,
+    limits: {
+        fileSize: 5 * 1024 * 1024 // 5MB
+    },
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype.startsWith('image/')) {
+            cb(null, true);
+        }
+        else {
+            cb(new Error('Only image files are allowed!'));
+        }
+    }
+});
+// const upload = multer({ storage });
 const signup = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (!req.body) {
         return res.status(400).json({ error: 'Request body is missing' });
@@ -126,38 +144,59 @@ exports.dashboard = dashboard;
 const updateProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
+        console.log('Request file:', req.file);
+        console.log('Request body:', req.body);
         if (!((_a = req.user) === null || _a === void 0 ? void 0 : _a.userId)) {
             return res.status(401).json({ error: 'Unauthorized' });
         }
-        const { phoneNumber, dateOfBirth } = req.body;
-        const updatedUser = yield user_1.default.findByIdAndUpdate(req.user.userId, {
-            $set: {
-                phoneNumber,
-                dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null
+        const updateFields = {
+            phoneNumber: req.body.phoneNumber,
+            dateOfBirth: req.body.dateOfBirth ? new Date(req.body.dateOfBirth) : undefined
+        };
+        // Handle file upload
+        if (req.file) {
+            console.log('Processing new profile image:', req.file);
+            // Delete old image if exists
+            try {
+                const user = yield user_1.default.findById(req.user.userId);
+                if (user === null || user === void 0 ? void 0 : user.profileImage) {
+                    const oldImagePath = path_1.default.join(__dirname, '../../public/uploads', user.profileImage);
+                    if (fs_1.default.existsSync(oldImagePath)) {
+                        fs_1.default.unlinkSync(oldImagePath);
+                    }
+                }
             }
-        }, { new: true, runValidators: true } // Added runValidators
-        ).select('name email phoneNumber dateOfBirth profileImage');
+            catch (fileError) {
+                console.error('Error handling old image:', fileError);
+            }
+            updateFields.profileImage = req.file.filename;
+        }
+        const updatedUser = yield user_1.default.findByIdAndUpdate(req.user.userId, { $set: updateFields }, { new: true, runValidators: true });
         if (!updatedUser) {
             return res.status(404).json({ error: 'User not found' });
         }
         return res.json({
-            user: updatedUser // Simplified response
+            user: Object.assign(Object.assign({}, updatedUser.toObject()), { profileImage: updatedUser.profileImage
+                    ? `/uploads/${updatedUser.profileImage}`
+                    : '/images/default-profile.png' })
         });
     }
     catch (error) {
         console.error('Error updating profile:', error);
-        return res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({
+            error: 'Internal server error',
+        });
     }
 });
 exports.updateProfile = updateProfile;
 const logoutUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         res.clearCookie("token");
-        res.redirect("/login");
+        res.status(200).json({ message: "Logout successful" });
     }
     catch (err) {
         console.error("Error during logout:", err);
-        res.status(500).send("Error logging out.");
+        res.status(500).json({ error: "Error logging out." });
     }
 });
 exports.logoutUser = logoutUser;

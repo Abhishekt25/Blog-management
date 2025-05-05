@@ -13,15 +13,32 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "public/uploads/");
+    // Create directory if it doesn't exist
+    const uploadPath = path.join(__dirname, '../../public/uploads');
+    fs.mkdirSync(uploadPath, { recursive: true });
+    cb(null, uploadPath);
   },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
-    cb(null, `${Date.now()}-${file.fieldname}${ext}`);
+    cb(null, `${Date.now()}${ext}`);
   },
 });
 
-const upload = multer({ storage });
+export const upload = multer({ 
+  storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed!'));
+    }
+  }
+});
+
+// const upload = multer({ storage });
   
 
 export const signup = async (req: any, res: any) => {
@@ -134,44 +151,73 @@ export const dashboard = async (req: any, res: any) => {
 
 export const updateProfile = async (req: any, res: any) => {
   try {
+    console.log('Request file:', req.file);
+    console.log('Request body:', req.body);
+
     if (!req.user?.userId) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const { phoneNumber, dateOfBirth } = req.body;
+    const updateFields: any = {
+      phoneNumber: req.body.phoneNumber,
+      dateOfBirth: req.body.dateOfBirth ? new Date(req.body.dateOfBirth) : undefined
+    };
+
+    // Handle file upload
+    if (req.file) {
+      console.log('Processing new profile image:', req.file);
+      
+      // Delete old image if exists
+      try {
+        const user = await User.findById(req.user.userId);
+        if (user?.profileImage) {
+          const oldImagePath = path.join(__dirname, '../../public/uploads', user.profileImage);
+          if (fs.existsSync(oldImagePath)) {
+            fs.unlinkSync(oldImagePath);
+          }
+        }
+      } catch (fileError) {
+        console.error('Error handling old image:', fileError);
+      }
+
+      updateFields.profileImage = req.file.filename;
+    }
 
     const updatedUser = await User.findByIdAndUpdate(
       req.user.userId,
-      {
-        $set: {
-          phoneNumber,
-          dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null
-        }
-      },
-      { new: true, runValidators: true } // Added runValidators
-    ).select('name email phoneNumber dateOfBirth profileImage');
+      { $set: updateFields },
+      { new: true, runValidators: true }
+    );
 
     if (!updatedUser) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    return res.json({
-      user: updatedUser // Simplified response
+    return res.json({ 
+      user: {
+        ...updatedUser.toObject(),
+        profileImage: updatedUser.profileImage 
+          ? `/uploads/${updatedUser.profileImage}`
+          : '/images/default-profile.png'
+      }
     });
-
-    
-
   } catch (error) {
     console.error('Error updating profile:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ 
+      error: 'Internal server error',
+      
+    });
   }
 };
+
+
+
 export const logoutUser = async (req: any, res: any) => {
   try {
       res.clearCookie("token"); 
-      res.redirect("/login"); 
+      res.status(200).json({ message: "Logout successful" });
   } catch (err) {
       console.error("Error during logout:", err);
-      res.status(500).send("Error logging out.");
+      res.status(500).json({ error: "Error logging out." });
   }
 };

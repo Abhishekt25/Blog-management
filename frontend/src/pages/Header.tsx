@@ -5,6 +5,13 @@ import ProfilePanel from './profileDetails';
 const Header: React.FC = () => {
   const [showProfile, setShowProfile] = useState(false);
 
+  const handleProfileClick = () => {
+    setShowProfile(prev => !prev);
+  };
+
+  const handleCloseProfile = () => {
+    setShowProfile(false);
+  };
   return (
     <header className="w-full h-[75px] bg-gray-50 px-6 py-3 flex items-center justify-between shadow-sm relative">
       {/* Logo and Menu */}
@@ -36,7 +43,7 @@ const Header: React.FC = () => {
         </button>
         <div
           className="flex items-center space-x-1 hover:text-black cursor-pointer"
-          onClick={() => setShowProfile((prev) => !prev)}
+          onClick={handleProfileClick}
         >
           <FiUser className="text-xl" />
           <FiChevronDown className="text-sm" />
@@ -44,7 +51,7 @@ const Header: React.FC = () => {
       </div>
 
       {/* Profile Panel */}
-      {showProfile && <ProfilePanel />}
+      {showProfile && <ProfilePanel onClose={handleCloseProfile} />}
     </header>
   );
 };

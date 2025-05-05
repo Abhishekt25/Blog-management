@@ -40,16 +40,6 @@ app.use((0, cors_1.default)({
     allowedHeaders: ["Content-Type", "Authorization"]
 }));
 app.use((0, cookie_parser_1.default)());
-app.post('/api/logout', (req, res) => {
-    try {
-        res.clearCookie("token"); // Clear the authentication cookie
-        res.status(200).json({ message: "Logout successful" });
-    }
-    catch (err) {
-        console.error("Error during logout:", err);
-        res.status(500).json({ error: "Error logging out." });
-    }
-});
 // app.use((req: any, res: any, next: any) => {
 //   res.locals.userId = req.userId ? req.userId : null;
 //   res.locals.profileImage = req.user ? req.user.profileImage : '/images/default-profile.jpg';

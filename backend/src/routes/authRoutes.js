@@ -12,5 +12,7 @@ router.get('/', authMiddleware_1.authMiddleware, authController_1.dashboard);
 // Public routes (no auth middleware)
 router.post('/signup', authController_1.signup);
 router.post('/signin', authController_1.login);
-router.put('/update', authMiddleware_1.authMiddleware, authController_1.updateProfile);
+router.post('/logout', authController_1.logoutUser);
+// router.put('/update', authMiddleware, updateProfile);
+router.put('/update', authMiddleware_1.authMiddleware, authController_1.upload.single('profileImage'), authController_1.updateProfile);
 exports.default = router;
